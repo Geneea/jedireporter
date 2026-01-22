@@ -10,7 +10,7 @@ readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.12"
 authors = [
-    {name = "JEDI Contributors"}
+    { name = "Geneea Analytics s.r.o", email = "support@geneea.com" }
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -40,7 +40,7 @@ python_files = ["test_*.py"]
 python_functions = ["test_*"]
 
 [tool.flake8]
-max-line-length = 88
+max-line-length = 120
 extend-ignore = ["E203"]
 exclude = [".git", "__pycache__", ".tox", "build", "dist", "*.egg-info"]
 
