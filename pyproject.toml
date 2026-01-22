@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jedi"
+version = "0.0.1"
+description = "JEDI - Journalistic Excellence through Domain-specific Intelligence"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+authors = [
+    {name = "JEDI Contributors"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+
+[project.scripts]
+jedi = "jedi.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "flake8>=6.0",
+    "tox>=4.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["jedi*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203"]
+exclude = [".git", "__pycache__", ".tox", "build", "dist", "*.egg-info"]
+
+[tool.tox]
+env_list = ["py312", "lint"]
+isolated_build = true
+
+[tool.tox.env_run_base]
+deps = ["pytest>=7.0"]
+commands = [["pytest", "{posargs}"]]
+
+[tool.tox.env.lint]
+deps = ["flake8>=6.0"]
+commands = [["flake8", "jedi", "tests"]]
