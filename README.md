@@ -5,7 +5,7 @@
 ## Installation
 
 ```bash
-pip install jedi
+pip install jedireporter
 ```
 
 For development:
@@ -17,7 +17,7 @@ pip install -e ".[dev]"
 ## Usage
 
 ```bash
-jedi --version
+jedireporter --version
 ```
 
 ## Development

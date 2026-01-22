@@ -7,10 +7,10 @@ from importlib.metadata import version
 
 def main() -> int:
     """Main entry point for the JEDI CLI."""
-    _version = version("jedi")
+    _version = version("jedireporter")
 
     parser = argparse.ArgumentParser(
-        prog="jedi",
+        prog="jedireporter",
         description="JEDI - Journalistic Excellence through "
                     "Domain-specific Intelligence",
     )
@@ -23,7 +23,7 @@ def main() -> int:
     parser.parse_args()
 
     # Default action: print version
-    print(f"jedi {_version}")
+    print(f"jedireporter {_version}")
     return 0
 
 
