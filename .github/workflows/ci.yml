@@ -23,13 +23,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
-      - name: Run linting
-        run: |
-          flake8 jedi tests
-
       - name: Run tests
         run: |
-          pytest
+          tox
 
   build:
     runs-on: ubuntu-latest
