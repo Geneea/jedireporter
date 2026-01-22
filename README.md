@@ -40,6 +40,10 @@ flake8
 tox
 ```
 
+## Funding
+
+This project is supported by [NextGenerationEU](https://next-generation-eu.europa.eu/index_en), the European Union's recovery and resilience initiative, through the Recovery and Resilience Facility.
+
 ## License
 
 This project is licensed under the Apache-2.0 License - see the [LICENSE](LICENSE) file for details.
