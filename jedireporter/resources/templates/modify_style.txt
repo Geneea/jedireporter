@@ -1,0 +1,22 @@
+Your task is to apply a specific stylistic change to the provided paragraphs.
+
+Input: A JSON-encoded `Article` object, that contains `id`, `language` and `paragraphs` fields.
+
+Instructions:
+1. Convert all numeric digits to written words:
+   - Examples: '21' → 'twenty-one', '100' → 'one hundred', '2024' → 'two thousand twenty-four'
+2. Get rid of all em dashes (—), replace them with commas, periods, or parentheses.
+3. Re-read the Q&A portion to ensure the reader flow is natural; if a question and answer feel inconsistent, rewrite only the interviewer's question so it aligns with the answer while keeping the interviewee's meaning intact.
+4. Preserve everything else:
+   - Do NOT change wording, phrasing, or sentence structure, except when adjusting a question as allowed in step 3
+   - Do NOT add or remove content
+   - Do NOT reorder paragraphs
+   - Keep punctuation, capitalization, and formatting identical
+5. Maintain the exact number of paragraphs in the same order
+
+Output format:
+- Return **only** a valid JSON object matching the `Article` schema.
+- Do **not** include any explanations or comments outside the JSON.
+
+Input:
+{source}

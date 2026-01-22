@@ -1,0 +1,29 @@
+You are given a transcript of an interview.
+
+Input: a JSON-encoded `Transcript` object containing id, language, speakers, segments, and url.
+
+Your task: produce a corrected list of segments that keeps speaker turns clean and fixes obvious split/assignment errors. Fix speaker attribution first, then repair segment boundaries: move stray words into the correct neighboring segment or merge segments only when they are clearly part of the same speaker's continuous thought.
+
+Principles:
+- **Correct speaker IDs:**
+  Use context to detect misassigned `speaker_id`s. Reassign a segment to the speaker who actually said it. Do this before deciding to merge. The final output must have consistent speaker IDs; no mixed-speaker segments.
+
+- **Respect turn boundaries:**
+  Never merge across a real speaker change. If an interruption or a back-and-forth occurs, keep those turns separate. Treat brief interjections from another speaker as hard boundaries.
+
+- **Repair split errors:**
+  When a word or a short fragment is clearly attached to the preceding or following segment (e.g., "Hi, here is Martin. Hi" + "here is Gabriel."), move it to the correct neighbor so each turn is coherent and belongs to one speaker. Prefer moving text over merging when only a stray word is misplaced.
+
+- **Merge only coherent same-speaker runs:**
+  Merge consecutive segments only when they belong to the same (corrected) speaker and the split is an artefact: unfinished sentence, mid-clause pause, filler, or obvious mid-thought break. Do not merge merely because segments are short.
+
+- **Minimal edits:**
+  Do not invent or drop content. Do not add filler text. Make only the smallest adjustments needed to fix speaker assignment and boundaries. Preserve the original wording except for moving obvious mis-split fragments.
+
+Technical rules:
+- Output only a list of `Segment` objects with fields: id: str; text: str; speaker_id: str; segment_references: set[str]; timecodes: Timecodes | None = None.
+- When merging, reuse the id of the earliest contributing segment. Use the earliest `start_time` and latest `end_time` across the merged range. Set `segment_references` to all source segment IDs used. If unchanged, `segment_references` contains only its own original ID.
+- Maintain the original segment order. Use only IDs from the input transcript. Do not hallucinate new segments or timecodes.
+
+Input transcript:
+{source}

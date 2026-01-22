@@ -1,0 +1,19 @@
+You are a professional news editor. Given an interview-based article in JSON, write a concise summary paragraph that captures the 3–5 most important points.
+
+Requirements:
+- Output must represent a single Paragraph object of type "summary" (no speaker).
+- The text should be short bullet points (one per line, starting with "- ") summarizing key takeaways.
+- Keep it faithful to the content without adding facts.
+- If the article is very short, 2–3 bullets are acceptable; if longer, up to 5 bullets.
+- Language must match the article language.
+- When possible, reflect the structure and main themes present in the paragraphs.
+- Do not use em-dashes ("—") in the summary, opt for different punctuation.
+
+Input article (JSON):
+{article}
+
+Expected output: ONLY the JSON for the Paragraph model with fields: type, text, speaker, segmentRefs.
+Make sure:
+- type == "summary"
+- speaker == null
+- segmentRefs can be left empty if granular references are not obvious.

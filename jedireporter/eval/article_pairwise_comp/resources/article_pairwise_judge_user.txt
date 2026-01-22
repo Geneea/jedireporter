@@ -1,0 +1,128 @@
+You will compare two AI-generated interview articles produced from the same source conversation and score them against a shared rubric.
+
+<article id="A">
+  {article_a}
+  Metadata:
+    - Number of words: {article_a_words_count}
+    - Number of headlines: {article_a_headlines_count}
+</article>
+<article id="B">
+  {article_b}
+  Metadata:
+    - Number of words: {article_b_words_count}
+    - Number of headlines: {article_b_headlines_count}
+</article>
+
+<transcript>
+  <!-- If no transcript is available, this placeholder will be "Transcript not provided." -->
+  {transcript_section}
+</transcript>
+
+<evaluation_criteria>
+For each of the nine criteria, assign both Article A and Article B one of:
+  - fully
+  - partly
+  - not_at_all
+  - not_evaluated
+
+Use the following interpretations:
+
+  1. Headlines: provide 3–4 alternative titles; if the interview centres on a person, every headline must contain the name.
+    - scoring:
+      - fully: supplies 3–4 viable headlines and includes the interviewee's name in every headline when the interview centres on a person.
+      - partly: provides headlines but the count or naming requirement is incomplete.
+      - not_at_all: no usable set of alternative headlines is present.
+  2. Intro & voice: open with an introductory paragraph before the Q&A, written in a first-person journalist voice ("I" or "we") that frames the conversation.
+    - scoring:
+      - fully: opens with a first-person introduction that precedes the Q&A and clearly frames the interview.
+      - partly: an introduction exists but the voice is inconsistent, not clearly first-person, or placement is incorrect.
+      - not_at_all: the piece launches straight into Q&A or the intro voice contradicts the guideline.
+  3. Interviewee responses: preserve the meaning of the interviewee's words, allowing only minimal grammatical polishing.
+    - When a source transcript is provided, compare against it.
+    - Note that the original transcript may contain errors, so minor changes in spelling or grammar can actually be a good sign. Focus more on any substantial changes in the meaning of what the interviewee said.
+    - In the justification, primarily highlight any answer parts that are not consistent between the two articles, and also include the original response as it appears in the transcript.
+    - When the source transcript is missing, this guideline cannot be evaluated and must be marked as not_evaluated.
+    - scoring:
+      - fully: responses remain faithful to the transcript with only light, grammatical editing; any obvious factual slips are flagged.
+      - partly: largely accurate but with minor paraphrasing, small omissions, or unflagged low-impact issues.
+      - not_at_all: responses are rewritten in a way that alters meaning, invents content, or omits key information.
+      - not_evaluated: use only when no transcript is provided or the transcript is unusable; state this explicitly in the justification.
+  4. Interviewer questions: questions may be tightened, expanded, or reframed to improve flow while staying contextually consistent with the conversation.
+    - It is allowed to use artificial questions (marked as "[Editorial]") which were not asked during the original interview, but help the article flow.
+    - scoring:
+      - fully: adjustments to questions improve clarity or pacing without distorting the conversation.
+      - partly: some improvements appear, but other questions feel verbatim where editing would help, or introduce mild confusion.
+      - not_at_all: rewrites break context, introduce inaccuracies, or the questions remain messy despite clear opportunities to refine them.
+  5. Readability:
+    - Break up long responses with editorial follow-ups when needed.
+    - Remove speech fillers.
+    - Avoid using em dashes except where truly necessary.
+    - Maintain clear nested quotations.
+    - Keep the text under 3000 words (the metadata contains reliable information about the article length).
+    - scoring:
+      - fully: long answers are broken up effectively; fillers are removed; nested quotations read cleanly; em dashes are used sparingly; the text is under 3000 words.
+      - partly: generally readable with occasional attribution, punctuation, or structural lapses, or the text slightly exceeds the limit.
+      - not_at_all: the article retains rambling passages, mishandles quotations or attribution, overuses em dashes, or clearly exceeds the word cap.
+  6. Terminology consistency
+    - Standardise technical terms and acronyms, e.g. spell out the first instance ("ONU - Organizzazione delle Nazioni Unite") followed by the acronym only in subsequent references.
+    - Ensure terms and acronyms are used consistently throughout each article.
+    - scoring:
+      - fully: terminology and acronyms are handled and applied consistently throughout.
+      - partly: terminology is mostly consistent but with a few minor slips that do not seriously harm clarity.
+      - not_at_all: terminology fluctuates or is expanded/abbreviated inconsistently in a way that harms clarity.
+  7. Coverage of transcript content: ensure that the final article reflects the full range of topics and substantive points from the original transcript. The wording does not need to match 1:1, but all major themes and answers should appear in some form, even if condensed or reordered.
+    - When a source transcript is provided, compare against it.
+    - It is acceptable to omit clear repetition, small talk, or trivial digressions, as long as the main topics and arguments are preserved.
+    - scoring:
+      - fully: all major topics and substantive answers from the transcript are present in the article, even if summarised or merged; only minor or repetitive parts are omitted.
+      - partly: most key topics are included, but some secondary themes, follow-up questions, or nuances are missing or overly compressed.
+      - not_at_all: significant sections, topics, or recurring themes from the transcript are absent, or the article focuses on only a narrow subset of the original content.
+      - not_evaluated: use only when no transcript is provided or the transcript is unusable; state this explicitly in the justification.
+  8. Overall reader preference (subjective): taking a step back from the detailed checks above, ask yourself: **"Which article would I actually want to read?"** Consider flow, engagement, clarity, and how satisfying the piece feels as a whole.
+    - scoring:
+      - fully: I would clearly choose to read this article; it feels engaging, well-paced, and coherent from start to finish.
+      - partly: I might skim or selectively read this article; it has some engaging or useful parts, but also noticeable weaknesses in flow, clarity, or structure.
+      - not_at_all: I would be unlikely to read this article; it feels confusing, dull, or structurally weak enough that I would probably skip it.
+  9. Structure & rhythm of the piece: beyond basic readability, the overall flow should feel intentional and well-paced.
+    - scoring:
+      - fully: sections and questions are ordered to build a clear narrative or thematic progression; transitions feel natural; the ending lands cleanly.
+      - partly: broadly coherent but with some jumps, saggy sections, or an abrupt/open-ended finish.
+      - not_at_all: feels like a random sequence of questions; pacing is jarring, with no clear build-up or resolution.
+</evaluation_criteria>
+
+<scoring_method>
+Follow these steps:
+
+1. Carefully read the transcript (if present) and both articles.
+2. For each of the nine criteria:
+  - Score Article A and Article B using: fully, partly, not_at_all, or not_evaluated (only use not_evaluated where allowed above).
+  - Provide a brief textual justification referencing concrete observations (e.g., headline count, presence/absence of first-person intro, specific transcript discrepancies, obvious terminology patterns).
+  - Indicate which article performed better for that criterion by setting better to one of: "article_a", "article_b", "tie", or "not_evaluated".
+3. Decide the overall winner by weighing the criterion-level outcomes:
+  - If one article clearly outperforms the other on multiple important criteria, choose that article as winner.
+  - If neither article establishes clear superiority, return "tie".
+4. Report confidence on a 0.0–1.0 scale:
+  - Values near 1.0: one article clearly leads across the evaluated criteria.
+  - Values around 0.5: mixed or balanced results.
+  - Values below 0.5: substantial uncertainty or very close performance.
+
+If the transcript is missing or extremely sparse, explicitly mention in the relevant justifications that criterion 3 (Interviewee responses) could not be fully evaluated and use not_evaluated where appropriate.
+</scoring_method>
+
+<output_format>
+Your final answer must be a single valid JSON object and nothing else.
+
+It must have exactly these top-level fields:
+- criteria: a list containing one entry per criterion with keys:
+  - id (integer 1–9)
+  - name (string: the criterion name)
+  - article_a_score (string: "fully" | "partly" | "not_at_all" | "not_evaluated")
+  - article_b_score (string: "fully" | "partly" | "not_at_all" | "not_evaluated")
+  - better (string: "article_a" | "article_b" | "tie" | "not_evaluated")
+  - justification (string: 1–4 sentences explaining the scores)
+- winner: "article_a", "article_b", or "tie".
+- confidence: decimal between 0.0 and 1.0, rounded to one decimal place (e.g., 0.7).
+- justification: 2–4 sentences summarising how the criterion results led to the decision (e.g., "Article A won criteria 2, 3, 6; Article B tied on the rest, so Article A wins with confidence 0.7.").
+
+Work through the evaluation step-by-step internally, but do not include your reasoning or any text outside this JSON object.
+</output_format>

@@ -1,0 +1,24 @@
+You are given a list of transcript segments.
+
+Input: a JSON array of `Segment` objects with fields:
+- id: str
+- text: str
+- speaker_id: str
+- segment_references: set[str]
+- timecodes: Timecodes | None = None
+
+Your task: lightly clean the text while preserving meaning. Correct obvious grammar and spelling errors, and remove filler/disfluency tokens ("um", "uh", "like", "you know", etc.). Some segments may be truncated because of previous splitting; treat unfinished starts/ends as normal, not mistakes.
+
+Rules per segment:
+- Fix grammar and spelling only where clearly needed; keep wording and length otherwise.
+- Remove verbal fillers and speech artifacts but do not drop meaningful words.
+- Do not paraphrase, rephrase, or add new information.
+
+Output: ONLY a JSON array of `FixedSegment` objects:
+- id: str  // original segment id
+- fixed_text: str  // cleaned text
+
+No explanations, markdown, or code fences. Do not invent or omit segments—return one FixedSegment for every input segment, which requires correction.
+
+Input segments:
+{relevant_segments}

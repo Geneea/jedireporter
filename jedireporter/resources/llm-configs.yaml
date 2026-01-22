@@ -1,0 +1,60 @@
+models:
+  - name: default
+    model_version: "gpt-5.1-2025-11-13"
+    provider: "openai"
+    api_key_env: JEDI_OPENAI_API_KEY
+    max_out_tokens: 64000
+    reasoning_effort: 'medium'
+
+  - name: gpt-4.1
+    model_version: "gpt-4.1-2025-04-14"
+    provider: "openai"
+    api_key_env: JEDI_OPENAI_API_KEY
+    max_out_tokens: 32768
+    temperature: 0.0
+
+  - name: gpt-5
+    model_version: "gpt-5-2025-08-07"
+    provider: "openai"
+    api_key_env: JEDI_OPENAI_API_KEY
+    max_out_tokens: 32768
+    reasoning_effort: 'medium'
+
+  - name: gpt-5-mini
+    model_version: "gpt-5-mini-2025-08-07"
+    provider: "openai"
+    api_key_env: JEDI_OPENAI_API_KEY
+    max_out_tokens: 32768
+    reasoning_effort: 'medium'
+
+  - name: gpt-5.1
+    model_version: "gpt-5.1-2025-11-13"
+    provider: "openai"
+    api_key_env: JEDI_OPENAI_API_KEY
+    max_out_tokens: 64000
+    reasoning_effort: 'medium'
+
+  - name: gpt-5.2
+    model_version: "gpt-5.2-2025-12-11"
+    provider: "openai"
+    api_key_env: JEDI_OPENAI_API_KEY
+    max_out_tokens: 64000
+    reasoning_effort: 'medium'
+
+  - name: claude
+    model_version: "eu.anthropic.claude-sonnet-4-5-20250929-v1:0"
+    provider: "bedrock"
+    max_out_tokens: 32768
+    thinking_tokens: 4096
+    aws_credentials_env:
+      access_key_id_env: AWS_ACCESS_KEY_ID
+      secret_access_key_env: AWS_SECRET_ACCESS_KEY
+      region_env: AWS_DEFAULT_REGION
+      role_env: AWS_BEDROCK_ROLE
+
+  - name: mistral
+    model_version: "mistral-large-2512"
+    provider: "mistral"
+    api_key_env: JEDI_MISTRAL_API_KEY
+    temperature: 0.0
+    max_out_tokens: 32768
