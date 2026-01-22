@@ -2,12 +2,13 @@
 
 import argparse
 import sys
-
-from jedi import __version__
+from importlib.metadata import version
 
 
 def main() -> int:
     """Main entry point for the JEDI CLI."""
+    _version = version("jedi")
+
     parser = argparse.ArgumentParser(
         prog="jedi",
         description="JEDI - Journalistic Excellence through "
@@ -16,13 +17,13 @@ def main() -> int:
     parser.add_argument(
         "--version",
         action="version",
-        version=f"%(prog)s {__version__}",
+        version=f"%(prog)s {_version}",
     )
 
     parser.parse_args()
 
     # Default action: print version
-    print(f"jedi {__version__}")
+    print(f"jedi {_version}")
     return 0
 
 
