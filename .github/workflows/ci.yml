@@ -1,14 +1,24 @@
 name: CI
 
-on:
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
+# How the CI Pipeline Works
+# - The CI workflow runs on all push events and pull requests.
+# - For pull requests from forks (coming from a different repository), we skip jobs/actions that need secrets (e.g.,
+#   publishing results, integration tests) to avoid exposing them. Only safe checks like local tests and flake8 are run.
+# - For pull requests from branches in this repository, the workflow is skipped to avoid running it twice (once for the
+#   push and once for the PR).
+# - The full workflow (including jobs requiring secrets) runs only on pushes events to branches in this repository
+on: [ push, pull_request ]
+concurrency: ci-${{ github.ref }}
+
+permissions:
+  contents: read
+  checks: write
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    # Skip PR runs for internal branches (push event already triggers CI)
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
 
     steps:
       - uses: actions/checkout@v4
@@ -30,6 +40,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: test
+    # Skip PR runs for internal branches (push event already triggers CI)
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
 
     steps:
       - uses: actions/checkout@v4
