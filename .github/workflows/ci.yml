@@ -51,13 +51,13 @@ jobs:
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
         with:
-          name: jedi-wheel
+          name: jedireporter-wheel
           path: dist/*.whl
           retention-days: 1
 
       - name: Upload sdist artifact
         uses: actions/upload-artifact@v4
         with:
-          name: jedi-sdist
+          name: jedireporter-sdist
           path: dist/*.tar.gz
           retention-days: 1
