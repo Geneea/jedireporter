@@ -58,7 +58,7 @@ google = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["src"]
 include = ["jedireporter*"]
 
 [tool.setuptools.package-data]
@@ -84,4 +84,4 @@ commands = [["pytest", "{posargs}"]]
 
 [tool.tox.env.lint]
 deps = ["flake8>=6.0", "flake8-pyproject>=1.2"]
-commands = [["flake8", "jedireporter", "tests"]]
+commands = [["flake8", "src", "tests"]]
