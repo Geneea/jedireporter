@@ -22,6 +22,7 @@ classifiers = [
 dependencies = [
     "boto3",
     "botocore",
+    "fastapi~=0.124",
     "httpx~=0.28",
     "instructor[bedrock,mistral]~=1.11",
     "langchain[openai]~=0.3",
@@ -31,6 +32,7 @@ dependencies = [
     "pydantic~=2.12",
     "python-dotenv~=1.1",
     "PyYAML",
+    "uvicorn~=0.38",
 ]
 
 [project.scripts]
@@ -38,6 +40,7 @@ jedireporter = "jedireporter.workflow:main"
 jedireporter-impex = "jedireporter.impex:main"
 jedireporter-transcript-eval = "jedireporter.eval.transcript_fix.run_transcript_eval:main"
 jedireporter-article-compare = "jedireporter.eval.article_pairwise_comp.run_article_pairwise_comp:main"
+jedireporter-server = "jedireporter.restapi.server:main"
 
 [project.urls]
 Repository = "https://github.com/Geneea/jedireporter"
