@@ -4,13 +4,16 @@
 
 AI-powered transcript processing that cleans up interview transcripts and converts them into polished article format.
 
+The JEDI Project is a collaboration between [Atex](https://www.atex.com/) and [Geneea](https://geneea.com).
+
+---
+
 [![PyPI version](https://img.shields.io/pypi/v/jedireporter)](https://pypi.org/project/jedireporter/)
 [![Python Versions](https://img.shields.io/pypi/pyversions/jedireporter)](https://pypi.org/project/jedireporter/)
 [![License](https://img.shields.io/pypi/l/jedireporter)](https://github.com/Geneea/jedireporter/blob/main/LICENSE)
 [![Downloads](https://img.shields.io/pypi/dm/jedireporter)](https://pypi.org/project/jedireporter/)
 [![Build Status](https://github.com/Geneea/jedireporter/workflows/CI/badge.svg)](https://github.com/Geneea/jedireporter/actions)
 
-Brief description of your package...
 ## Installation
 
 ```bash
