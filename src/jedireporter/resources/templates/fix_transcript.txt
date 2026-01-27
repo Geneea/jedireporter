@@ -1,0 +1,28 @@
+You are given a transcript of an interview. Repair it so it becomes internally consistent and faithful to the audio that produced it.
+
+Important: preserve as much relevant interview content as possible. Make minimal, meaning‑preserving fixes now; defer larger editorial cuts or reshaping to later steps.
+
+Input: a JSON-encoded `Transcript` object containing metadata, speakers, and segments. Each segment has an `id`, optional `timecodes`, a `speaker_id`, and raw transcription text. The transcript may include misspellings, incorrect punctuation, wrong speaker assignments, poorly split segments, and other transcription artefacts. Use the full interview context to detect and correct these issues.
+
+Goals:
+1. Repair transcription mistakes: grammar, spelling, words that obviously do not fit the conversation, missing diacritics, duplicated fragments, etc. Merge segments when the conversation flow demands it.
+2. Ensure the transcript reflects coherent dialogue. Preserve the conversation order and cover the entire interview with no gaps, overlaps, or duplicated content.
+3. Reconstruct the `speakers` list: identify which participant is the interviewer/host and which is the guest (or other roles). Set each speaker's `role` to either `host` or `guest`, optionally add names/descriptions if clear from context, and ensure every `speaker_id` used in `segments` is declared in `speakers`.
+4. Preserve context that belongs to the interview (e.g., host introductions, hand‑offs, and transitions). Remove only clear advertisements, housekeeping, or off‑topic content—and only when you are sure it is off‑topic.
+5. Maintain accurate timecodes. When you merge multiple original segments, the new segment must use the earliest `start_time` and latest `end_time` of the merged range. Never invent new times; reuse the originals so the full timeline is preserved.
+6. Remove verbal fillers and speech artifacts typical of spoken language (e.g., "um", "uh", "like", "you know", etc.) while preserving meaning.
+
+Transformation rules:
+- Keep `transcript.id`, `transcript.language`, and `transcript.url` unchanged.
+- Segment `id`s must be unique. When merging segments, reuse the `id` of the earliest contributing segment.
+- Keep speaker turn order consistent with the conversation. Do not drop meaningful content.
+- Ensure every segment contains a non-empty `text` and a valid `speaker_id`.
+- The final transcript must be a well-formed `Transcript` object that can be parsed by the provided schema.
+- For every output segment, set `segment_references` to the set of IDs of the original input `Transcript` segments that were used to create that segment. If a segment is unchanged (not merged with another one), `segment_references` must contain only its own original ID. Use only IDs from the input `Transcript`, never invent or modify IDs.
+- Do not alter the meaning or context of interviewee responses. Only minimal wording fixes are allowed (e.g., declension/inflection, obvious typos) that fully preserve meaning.
+- Do not remove interviewer questions or later parts of the interview. If unsure about a segment's relevance, keep it.
+
+Output: Return ONLY the corrected `Transcript` as raw JSON (one JSON object). No explanations, markdown, or code fences.
+
+Input transcript:
+{source}

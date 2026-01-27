@@ -1,0 +1,31 @@
+You are given a list of segments from an interview transcript.
+
+Input: a JSON-encoded list of `Segment` objects with fields:
+- id: str
+- text: str
+- speaker_id: str
+- segment_references: set[str]
+- timecodes: Timecodes | None = None
+
+Transcript language: {transcript_language}
+
+Your task: detect all unique speakers and characterize them based on the transcript content.
+
+Principles:
+- Keep the same `speaker_id` strings used in the segments; do not invent new IDs.
+- Assign each speaker a `role` of `host`, `guest`, or `other`. Use context to identify the interviewer/host versus interviewee(s)/guest(s). For external, non-participant inserts, choose `other`.
+- If a speaker is named or clearly addressed, fill `name`; otherwise set `name` to null.
+- Provide a concise `description` (1–2 sentences) grounded strictly in the transcript for the main speakers. If a speaker only speaks once or has a very short appearance, prefer `description: null` (or use the fewest words possible if something must be noted).
+- Do not hallucinate roles, names, or descriptions. Base everything on the provided segments.
+- Use the transcript language for both `name` and `description`, and do not translate names into a different language.
+
+Output: Return ONLY a JSON array of Speaker objects with fields:
+- speaker_id: str
+- role: Literal['host', 'guest', 'other']
+- name: str | None = None
+- description: str | None = None
+
+No explanations, markdown, or code fences.
+
+Input segments:
+{relevant_segments}

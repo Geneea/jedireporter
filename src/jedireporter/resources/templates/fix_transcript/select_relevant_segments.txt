@@ -1,0 +1,29 @@
+You are given a list of segment objects from an interview transcript.
+
+Each Segment object has fields:
+- id: str
+- text: str
+- speaker_id: str
+- segment_references: set[str]
+- timecodes: Timecodes | None = None
+
+Your task: return only the IDs of segments that clearly belong to the main interview conversation.
+
+Keep:
+- Host/guest dialogue that advances the interview.
+- Brief greetings, hand-offs, or setup that lead into the interview.
+- Natural closings or sign-offs tied to the interview.
+
+Exclude:
+- Advertisements, sponsor reads, or promotional interruptions.
+- Inserted clips or content from other shows or topics.
+- Clearly off-topic chatter that does not serve the interview.
+- Scripted/archival lines from played media (news packages, movie clips, dramatic reenactments, narrated excerpts), even if they were transcribed under a main speaker_id or sound like first-person testimony. Treat these as outside the live interview.
+
+Output: ONLY a JSON array of relevant segment IDs (e.g., ["1", "2"]). No objects, no text, no markdown, no explanations.
+
+Input segments:
+{segments}
+
+Current status (with last error message if this is not a first try):
+{status}

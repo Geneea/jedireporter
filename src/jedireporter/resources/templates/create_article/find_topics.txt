@@ -1,0 +1,22 @@
+You are an expert editor. Read the fixed interview transcript and identify 2–6 coherent, high-level discussion topics (only exceed 6 if the transcript is very long and clearly covers many unrelated sections).
+
+Instructions:
+- Provide ONLY a JSON array of Topic objects.
+- Each Topic has fields: id (slug-like, lowercase, hyphen-separated, stable), title (human-readable), description (optional).
+- Choose topic granularity that groups related Q&A logically. Default to broader themes that combine closely related subpoints, and avoid fragmenting into narrow slices unless the transcript is exceptionally long.
+- Derive ids from the title (e.g., "AI Ethics" -> "ai-ethics").
+- Do not invent content not present in the transcript.
+
+Important: Topics are later used to label Q&A pairs. Ensure topics reflect how questions and answers cluster naturally.
+
+Input transcript (JSON):
+{source}
+
+Expected output:
+[
+  {{
+    "id": "sample-id",
+    "title": "Sample Title",
+    "description": "Optional short description"
+  }}
+]

@@ -1,0 +1,62 @@
+You are given a list of interview segments. Some segments contain conversational questions embedded in longer turns; others may have multiple speaker turns or stray phrases merged into one segment.
+
+Input:
+  - JSON list of `Segment` objects with fields:
+    - id: str
+    - text: str
+    - speaker_id: str
+    - timecodes: Timecodes | None = None
+    - segment_references: set[str]
+
+  - JSON list of `Speaker` objects with fields:
+    - speaker_id: str
+    - role: Literal['host', 'guest', 'other']
+    - name: str | None = None
+    - description: str | None = None
+
+Your task: first decide which segments are clearly merged incorrectly (embedded conversational questions, mixed speaker turns/fragments, or inserted non-interview clips such as movie/news audio). Then, for each such segment, output how it should be split into ordered parts **where the speaker actually changes between parts, or where a clearly non-conversational clip needs isolating even if the speaker_id stays the same**. Segments that do not need splitting must be omitted from the output.
+
+Goal:
+- Identify segments where the text mixes content from multiple speakers (e.g., a short conversational question or fragment spoken by one person merged into the other person's turn).
+- Also isolate clearly inserted clips or scripted/non-conversational audio (news packages, movie lines, narrated excerpts) that appear inside a speaker's turn so they can be filtered out later.
+- Split only those segments into ordered parts so downstream processing can separate and reassign the pieces to the correct speakers or drop the non-interview inserts.
+
+Key constraints:
+- A segment should be included in the output **only if**:
+  - At least one contiguous fragment within that segment clearly belongs to a different speaker than the original `speaker_id`, **or** is a clearly non-interview insert (scripted clip, archival audio, dramatized line) that should be isolated from the live conversation, and
+  - The resulting `text_parts` reflect true boundaries: either alternating speakers, or separating out the non-conversational insert from the surrounding live dialogue.
+- If, after reasoning, all parts would still have the same `speaker_id`, **do not split the segment** and **do not output it**.
+
+Principles:
+- Think in two steps:
+  1. Identify segments that need splitting because part of the text belongs to a different speaker (embedded conversational questions, mixed speaker turns, or short stray fragments from another speaker).
+  2. For those segments only, split the text into `text_parts` and assign `speaker_id` to each part.
+- Focus on **real conversational questions** addressed to another person; ignore rhetorical/self-reflective questions that clearly belong to the same speaker.
+- Use neighboring context and the provided speakers/roles to infer speaker mix-ups and spot inserted clips:
+  - Compare with the previous and next segments' speakers and content.
+  - If a segment is labeled as one speaker (e.g., a guest) but contains a very short question-like clause (few words, ending in "?") that behaves like a clarification, follow-up, or prompt typical of the other speaker (e.g., a host), and the surrounding text reads like a continuous answer from the labeled speaker, treat that short question-like clause as belonging to the other speaker.
+  - If a fragment reads like a quoted line from a film/news/archival source or a narrated aside that is not part of the live Q&A, treat it as a non-conversational insert and split it out so it can be ignored later. Keep its text verbatim; assign the most appropriate speaker_id (often the same as the surrounding turn if no distinct speaker is clear).
+  - More generally, any fragment whose wording and function fit the role and style of a different speaker (host vs guest) rather than the labeled one should be reassigned.
+- When splitting:
+  - Cut the `text` into `text_parts` that, concatenated in order, reproduce the original `text` exactly.
+  - Each `TextPart.text` must be a contiguous substring of the original segment text.
+  - Assign `speaker_id` for each `TextPart` to the speaker who most likely uttered that fragment (using roles and context).
+- After assigning `speaker_id`s, **merge any adjacent fragments that end up with the same `speaker_id`** so that every boundary between consecutive `TextPart`s corresponds to a real speaker change. Exception: keep a boundary if it isolates a non-conversational insert from the surrounding live dialogue, even when the `speaker_id` is the same, so downstream steps can drop that insert.
+- A single embedded fragment from another speaker often yields three parts before merging: `<text_before_foreign_fragment>`, `<foreign_fragment>`, `<text_after_foreign_fragment>`. After merging any same-speaker neighbors, you should end up with alternating speakers only.
+- Preserve wording exactly; do not add, remove, or reorder any characters.
+
+Output:
+- ONLY a JSON list of `SegmentSplit` objects.
+- Each `SegmentSplit` corresponds to a single original segment that requires splitting due to mixed speakers.
+- Each `SegmentSplit.id` must be the original segment id.
+- Each `SegmentSplit.text_parts` must be the ordered list of `TextPart` objects covering the entire original segment text.
+- Each `TextPart.text` must be a contiguous text fragment from the original segment text.
+- Each `TextPart.speaker_id` must be a valid speaker id from the provided speakers.
+- Do **not** include any `SegmentSplit` where all `TextPart` items would share the same `speaker_id`, or where `text_parts` would have length 1.
+- If no segments need splitting, output an empty JSON list: `[]`.
+
+Input segments:
+{relevant_segments}
+
+Speakers:
+{speakers}

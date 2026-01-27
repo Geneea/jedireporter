@@ -1,0 +1,68 @@
+Your task is to transform the following interview transcript into a polished magazine-style article that follows newsroom editorial guidelines.
+Always respect the language of the transcript and use the same language for the article as well.
+
+Input: A JSON-encoded `Transcript` object representing the full, cleaned interview (including speakers and segments).
+Also provided: a JSON array `topics` listing detected interview topics. Use these when assigning Q&A to topics.
+Topic selection: {topic_scope}
+
+Article structure requirements:
+1. Headline(s):
+   - Create 3-4 options of engaging title that captures the essence of the interview.
+   - If a specific person is interviewed, include their name in each title.
+2. Lead and scene-setting introduction: Write a short opening that introduces the topic and guest, then add 1-2 paragraphs that provide context and set the tone. Use the first-person singular (as a single journalist) or first-person plural when speaking for the editorial team (e.g., "this week we interviewed..."), but keep the form consistent throughout the introduction paragraphs. Use type "lead" paragraph. Do not include sensitive or gratuitous medical or personal-condition descriptions in the lead/intro unless the interviewee directly discusses them in the interview; when a sensitive topic is directly discussed, it may be included with restraint.
+3. Q&A body: Present the main interview as a question-and-answer dialogue:
+   - Questions: Use the type "question" for interviewer's questions
+   - Answers: Use the type "answer" for interviewee's responses (keep them in quotes); do not change meaning
+   - Context paragraphs: Between some answers, add type "text" paragraphs that provide background, clarify points, or add narrative flow (use the interviewer's voice). Use them sparingly and only to add *new* context; do not repeat facts already covered in nearby Q&A, and do not include long quotations inside `text` paragraphs.
+   - Stay strictly within the selected topics: skip transcript portions unrelated to the selected topics, and do not create questions/answers for out-of-scope material.
+   - **Topic coverage requirement:** Assign every guest answer from the interview body to one of the selected topics, even if the fit is imperfect. If a Q&A does not obviously match a topic, map it to the closest relevant topic rather than skipping it.
+   - Improving readability: Avoid long runs of guest-only answers: Do not leave multiple `answer` paragraphs from the same interviewee in a row without any intervening `question` or `text` paragraph.
+     - When the transcript contains several consecutive segments that are clearly part of a single, continuous answer, **merge them into one `answer` paragraph** for the article, and include all relevant source segments in `segment_refs`.
+     - When the transcript contains consecutive answers that are *related but distinct points* (for example, a list of reasons or aspects), you MUST either:
+       - Insert an **editorial `question`** between them, marked with `"[Editorial]"` at the start of the `text` (e.g., `"[Editorial] Can you break down the main aspects you considered?"`), or
+       - Insert a short **`text` paragraph** in the interviewer's voice that summarizes or transitions between the ideas.
+     - Any editorial `question` you add should use `segment_refs` from the neighboring `answer` paragraph(s) to anchor its placement.
+     - When merging adjacent answer segments:
+       - Keep the meaning and tone unchanged, only tightening grammar and removing fillers.
+       - Ensure the merged `answer` remains readable; if it becomes too long, prefer breaking it with an editorial `question` or `text` paragraph instead.
+   - Speaker assignment: For each "question" and "answer" paragraph, set `speaker` to a valid `speaker_id` from `Transcript.speakers`. Decide primarily from the speakers of the referenced segments; if inconsistencies arise, resolve using the full interview context. For "title", "summary" and "lead", "text" paragraphs, leave `speaker` null.
+   - Topic assignment: For each "question", "answer" and "text" paragraph, set `topicId` to one of the provided `topics` (by `id`). Do not assign `topicId` to non-Q&A types. Ensure that a logical question and its answer share the SAME `topicId` and are not split across different topics.
+4. Conclusion: End with a brief closing paragraph that wraps up the interview. Use paragraph type "conclusion".
+
+Content guidelines:
+- Use the `speakers` metadata to keep the interviewer and guest voices distinct
+- Keep quoted answers faithful to the transcript segments referenced in each `Paragraph`. Preserve meaning, but you may lightly adjust wording—especially of direct answers to questions or obvious transcript errors—when the raw transcript breaks the logical flow between question and answer; do not change the substance of the interviewee's response.
+- Keep answers as straightforward quotes. Avoid adding extra reporting verbs or tags such as "he says/she admits/he recalls" inside answers unless they appear verbatim in the referenced transcript segments. Rely on the speaker labels for attribution.
+- The interviewer's questions may be reworked, summarised, or lightly expanded to improve reading flow.
+- If you trim a response for concision, maintain the meaning and include all relevant source spans via `segment_refs`.
+- Summarise narration or setup from the interviewer when helpful, but do not invent dialogue, and avoid quoting the interviewer inside `text` paragraphs—turn those into clear questions instead.
+- Ensure smooth transitions and natural flow between sections using the interviewer's voice for connective text, but avoid repeating the same anecdotes or biographical facts in multiple paragraphs.
+- If the question-answer sequence feels disjointed, lightly reshape the interviewer's wording or add brief connective text so the article reads naturally while preserving the interviewee's meaning.
+- Remove verbal fillers and speech artefacts (e.g., "um", "uh", "like", "you know"), as this is written journalism.
+- **Do not use em dashes (—)**, which are overused; prefer commas, periods, or parentheses.
+- Use nested quotation marks for quotes within quotes, e.g.: "That day I told all the girls 'let's go!' and they left more relaxed."
+
+Output format:
+- Return an **Article** object:
+  - `id`: reuse the transcript id, prefixed with `"article-"`
+  - `language`: copy from the transcript
+  - `paragraphs`: ordered list of `Paragraph` objects, each with fields:
+    - `id`: null
+    - `type`: Literal["title", "summary", "lead", "conclusion", "text", "question", "answer"]
+    - `text`: content of the paragraph
+    - `segment_refs`: fill only the `segment_id` field, leave the `offset` and `length` as null
+    - `speaker`: valid "speaker_id" from the `Transcript.speakers` when the paragraph type is "question" or "answer", otherwise null
+    - `topic_id`: for "question"/"answer"/"text" only, set to one of the provided `topics` ids; omit/null for other types
+  - `transcript`: null
+  - `debug_info`: empty dict
+
+Safety & Consistency Checks:
+- Do not fabricate quotes. If you paraphrase for grammar, keep the meaning unchanged and set `segment_refs` to the source spans you modified.
+- Do not include advertisements, housekeeping, or off-topic material.
+- Ensure every paragraph has at least one `segment_ref`; for narrative paragraphs referencing multiple segments, include all relevant refs. For editorial questions, use the nearby answer's refs to anchor the question.
+
+Inputs:
+- Transcript JSON:
+{source}
+- Topics JSON (array of Topic objects with fields: id, title, description|null):
+[{topics}]

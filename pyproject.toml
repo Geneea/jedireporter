@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "jedireporter"
-version = "0.0.1"
+version = "0.1.0"
 description = "JEDI - Journalistic Excellence through Domain-specific Intelligence"
 readme = "README.md"
-license = "Apache-2.0"
+license = {text = "Apache-2.0"}
 requires-python = ">=3.12"
 authors = [
     { name = "Geneea Analytics s.r.o", email = "support@geneea.com" }
@@ -19,20 +19,50 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
 ]
+dependencies = [
+    "boto3",
+    "botocore",
+    "httpx~=0.28",
+    "instructor[bedrock,mistral]~=1.11",
+    "langchain[openai]~=0.3",
+    "langfuse~=3.10",
+    "langgraph~=0.6",
+    "langsmith~=0.4",
+    "pydantic~=2.12",
+    "python-dotenv~=1.1",
+    "PyYAML",
+]
 
 [project.scripts]
-jedireporter = "jedireporter.cli:main"
+jedireporter = "jedireporter.workflow:main"
+jedireporter-impex = "jedireporter.impex:main"
+jedireporter-transcript-eval = "jedireporter.eval.transcript_fix.run_transcript_eval:main"
+jedireporter-article-compare = "jedireporter.eval.article_pairwise_comp.run_article_pairwise_comp:main"
 
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0",
     "flake8>=6.0",
+    "flake8-pyproject>=1.2",
     "tox>=4.0",
+]
+eval = [
+    "jiwer~=4.0",
+    "numpy~=2.4",
+    "scipy~=1.15",
+]
+google = [
+    "google-api-python-client~=2.186",
+    "google-auth-httplib2~=0.2",
+    "google-auth-oauthlib~=1.2",
 ]
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["src"]
 include = ["jedireporter*"]
+
+[tool.setuptools.package-data]
+"jedireporter" = ["resources/**/*", "eval/**/resources/**/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -49,9 +79,9 @@ env_list = ["py312", "lint"]
 isolated_build = true
 
 [tool.tox.env_run_base]
-deps = ["pytest>=7.0"]
+extras = ["dev", "eval", "google"]
 commands = [["pytest", "{posargs}"]]
 
 [tool.tox.env.lint]
-deps = ["flake8>=6.0"]
-commands = [["flake8", "jedireporter", "tests"]]
+deps = ["flake8>=6.0", "flake8-pyproject>=1.2"]
+commands = [["flake8", "src", "tests"]]
