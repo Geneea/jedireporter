@@ -7,7 +7,7 @@ name = "jedireporter"
 version = "0.1.0"
 description = "JEDI - Journalistic Excellence through Domain-specific Intelligence"
 readme = "README.md"
-license = {text = "Apache-2.0"}
+license = "Apache-2.0"
 requires-python = ">=3.12"
 authors = [
     { name = "Geneea Analytics s.r.o", email = "support@geneea.com" }
