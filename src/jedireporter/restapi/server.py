@@ -3,6 +3,7 @@ import json
 import os
 import sys
 import traceback
+from contextlib import asynccontextmanager
 from importlib.metadata import distribution
 from typing import Any, Callable, Sequence
 
@@ -68,6 +69,12 @@ _exception_handlers = {
 }
 
 
+@asynccontextmanager
+async def _lifespan(app: FastAPI):
+    llm = InstructorLLM.from_profile(LLMProfileLoader.get(app.state.llm_profile_id))
+    yield {'llm': llm}
+
+
 class _ApiRoute(APIRoute):
     def __init__(
             self, path: str, endpoint: Callable[..., Any],
@@ -107,8 +114,7 @@ async def generate(api_transcript: APITranscript, rq: Request) -> APIArticle:
     transcript = api_transcript.to_internal()
 
     # Create the processing chain
-    llm = InstructorLLM.from_profile(rq.app.state.llm_profile)
-    interview_processor = InterviewProcessor(llm)
+    interview_processor = InterviewProcessor(rq.state.llm)
     chain = interview_processor.create_workflow()
 
     # Process the transcript
@@ -148,10 +154,11 @@ def create_app(
         middleware=[
             Middleware(GZipMiddleware, minimum_size=512, compresslevel=9),
         ],
+        lifespan=_lifespan,
         debug=debug or os.getenv('DEBUG', 'false').lower() == 'true',
         version=_VER,
     )
-    app.state.llm_profile = LLMProfileLoader.get(llm_profile or os.getenv('JEDI_LLM_PROFILE', '') or 'default')
+    app.state.llm_profile_id = llm_profile or os.getenv('JEDI_LLM_PROFILE', '') or 'default'
     return app
 
 
