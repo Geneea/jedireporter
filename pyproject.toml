@@ -86,7 +86,7 @@ isolated_build = true
 
 [tool.tox.env_run_base]
 extras = ["dev", "eval", "google"]
-commands = [["pytest", "{posargs}"]]
+commands = [["pytest", "--junitxml=test-results.xml", "{posargs}"]]
 
 [tool.tox.env.lint]
 deps = ["flake8>=6.0", "flake8-pyproject>=1.2"]
