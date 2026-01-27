@@ -75,7 +75,22 @@ jedireporter -i transcript.jsonl -o article.jsonl --llm-profile <profile>
 
 ## Input Format
 
-Transcript JSON structure (one JSON object per line in `.jsonl` format):
+Transcript JSON structure (one JSON object per line in `.jsonl` format).
+
+### Minimal Example (mandatory fields only)
+
+```json
+{
+  "id": "interview-001",
+  "language": "en",
+  "segments": [
+    {"id": "0", "speaker_id": "spk_0", "text": "Welcome to the show."},
+    {"id": "1", "speaker_id": "spk_1", "text": "Thank you for having me."}
+  ]
+}
+```
+
+### Full Example (with optional fields)
 
 ```json
 {
@@ -86,56 +101,45 @@ Transcript JSON structure (one JSON object per line in `.jsonl` format):
       "id": "0",
       "speaker_id": "spk_0",
       "text": "Welcome to the show.",
-      "timecodes": {
-        "start_time": 0.0,
-        "end_time": 2.5
-      }
+      "timecodes": {"start_time": 0.0, "end_time": 2.5}
     },
     {
       "id": "1",
       "speaker_id": "spk_1",
       "text": "Thank you for having me.",
-      "timecodes": {
-        "start_time": 2.5,
-        "end_time": 4.0
-      }
+      "timecodes": {"start_time": 2.5, "end_time": 4.0}
     }
   ],
   "speakers": [
-    {
-      "speaker_id": "spk_0",
-      "role": "host",
-      "name": "John Smith",
-      "description": "Host of the Morning Show"
-    },
-    {
-      "speaker_id": "spk_1",
-      "role": "guest",
-      "name": "Jane Doe",
-      "description": "CEO of TechCorp"
-    }
+    {"speaker_id": "spk_0", "role": "host", "name": "John Smith", "description": "Host of the Morning Show"},
+    {"speaker_id": "spk_1", "role": "guest", "name": "Jane Doe", "description": "CEO of TechCorp"}
   ],
   "url": "https://youtube.com/watch?v=abc123"
 }
 ```
 
-### Field Descriptions
+### Mandatory Fields
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `id` | Yes | Unique transcript identifier |
-| `language` | Yes | Language code (e.g., "en", "cs") |
-| `segments` | Yes | List of dialogue segments |
-| `segments[].id` | Yes | Unique segment identifier |
-| `segments[].speaker_id` | Yes | Speaker identifier |
-| `segments[].text` | Yes | Spoken text content |
-| `segments[].timecodes` | No | Start and end times in seconds |
-| `speakers` | No | Speaker metadata |
-| `speakers[].speaker_id` | Yes | Matches segment speaker_id |
-| `speakers[].role` | Yes | "host", "guest", or "other" |
-| `speakers[].name` | No | Human-readable name |
-| `speakers[].description` | No | Title, affiliation, etc. |
-| `url` | No | Source audio/video URL |
+| Field | Description |
+|-------|-------------|
+| `id` | Unique transcript identifier |
+| `language` | Language code (e.g., "en", "cs") |
+| `segments` | List of dialogue segments |
+| `segments[].id` | Unique segment identifier |
+| `segments[].speaker_id` | Speaker identifier |
+| `segments[].text` | Spoken text content |
+
+### Optional Fields
+
+| Field | Description |
+|-------|-------------|
+| `segments[].timecodes` | Start and end times in seconds |
+| `speakers` | Speaker metadata list |
+| `speakers[].speaker_id` | Matches segment speaker_id (required if speakers provided) |
+| `speakers[].role` | "host", "guest", or "other" (required if speakers provided) |
+| `speakers[].name` | Human-readable name |
+| `speakers[].description` | Title, affiliation, etc. |
+| `url` | Source audio/video URL (enables timecode linking in exports)
 
 ## Import/Export (impex)
 
@@ -157,11 +161,21 @@ Speaker Name: And the conversation continues...
 
 Each line follows the pattern `Speaker Name: Text content`. Empty lines are ignored.
 
+### Import: AWS Transcribe JSON to Transcript JSON
+
+Convert [AWS Transcribe](https://docs.aws.amazon.com/transcribe/latest/dg/how-it-works.html) output to transcript JSON format:
+
+```bash
+jedireporter-impex import --format aws-transcribe -i transcribe-output.json -o transcript.jsonl
+```
+
+**Note:** Speaker diarization must be enabled in AWS Transcribe for speaker labels to be included. Without diarization, all segments will be assigned to `spk_0`.
+
 **Options:**
 
 | Option | Description |
 |--------|-------------|
-| `--format` | Input format (currently: `plain-text`) |
+| `--format` | Input format: `plain-text` or `aws-transcribe` |
 | `--language` | Language code for the transcript |
 | `-i`, `--input-file` | Input file path (supports glob patterns) |
 | `-o`, `--output-file` | Output file path |
@@ -196,7 +210,7 @@ jedireporter-impex export --format google-doc -i article.jsonl --credentials ser
 | Command | Description |
 |---------|-------------|
 | `jedireporter` | Main processing workflow (transcript to article) |
-| `jedireporter-impex import` | Convert plain text to transcript JSON |
+| `jedireporter-impex import` | Convert plain text or AWS Transcribe output to transcript JSON |
 | `jedireporter-impex export` | Convert article JSON to markdown/Google Docs |
 
 ## Example End-to-End Workflow

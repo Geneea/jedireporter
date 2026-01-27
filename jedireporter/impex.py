@@ -8,7 +8,7 @@ from typing import Any, Iterable
 
 from jedireporter.article import Article, TextOccurrence, WebSearchResult
 from jedireporter.article import Paragraph, Topic
-from jedireporter.transcript import SegmentSource, Speaker, Transcript
+from jedireporter.transcript import SegmentSource, Speaker, Timecodes, Transcript
 from jedireporter.utils import cli_utils as cliutil
 from jedireporter.utils import dict_utils as dictutil
 from jedireporter.utils import logging as logutil
@@ -54,6 +54,38 @@ class PlainTextImporter:
             segments=segments,
             url=self._url,
         )
+
+
+class AwsTranscribeImporter:
+    def __init__(self, *, language: str | None = None):
+        self._language = language
+
+    def from_json(self, data: dict) -> Transcript:
+        # Extract transcript ID from jobName
+        transcript_id = data.get('jobName', uuid.uuid4().hex)
+
+        # Extract language from results or use provided/default
+        results = data.get('results', {})
+        language = results.get('language_code') or self._language or 'und'
+
+        # Extract segments from audio_segments
+        audio_segments = results.get('audio_segments', [])
+        segments = []
+        for seg in audio_segments:
+            timecodes = None
+            if 'start_time' in seg and 'end_time' in seg:
+                timecodes = Timecodes(
+                    start_time=float(seg['start_time']),
+                    end_time=float(seg['end_time'])
+                )
+            segments.append(SegmentSource(
+                id=str(seg.get('id', len(segments))),
+                text=seg.get('transcript', ''),
+                speaker_id=seg.get('speaker_label', 'spk_0'),
+                timecodes=timecodes
+            ))
+
+        return Transcript(id=transcript_id, language=language, segments=segments)
 
 
 class ExportHelper:
@@ -616,6 +648,14 @@ def import_cli(args):
                     transcript = importer.from_lines(finp)
                     print(transcript.model_dump_json(), file=fout)
 
+    elif args.format == 'aws-transcribe':
+        import json
+        with cliutil.argOpenIn(args) as finp, cliutil.argOpenOut(args) as fout:
+            data = json.load(finp)
+            importer = AwsTranscribeImporter(language=args.language)
+            transcript = importer.from_json(data)
+            print(transcript.model_dump_json(), file=fout)
+
     else:
         raise ValueError(f'Unsupported format: {args.format}')
 
@@ -688,7 +728,7 @@ def main():
 
     p_import = subparsers.add_parser('import', formatter_class=parser.formatter_class,
                                      help='Converts to the Transcript JSON format.')
-    p_import.add_argument('--format', choices=['plain-text'], default='plain-text',
+    p_import.add_argument('--format', choices=['plain-text', 'aws-transcribe'], default='plain-text',
                           help='The format of the input file.')
     p_import.add_argument('--language', help='The transcription text language.')
     cliutil.addInOutArgGroups(p_import)
