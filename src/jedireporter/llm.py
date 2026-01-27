@@ -2,7 +2,7 @@ import os
 
 from abc import ABC, abstractmethod
 from enum import Enum
-from functools import cached_property, wraps
+from functools import cached_property
 from importlib.resources import open_text
 from typing import Any, Callable, ClassVar, Dict, Type, TypeVar
 
@@ -36,6 +36,7 @@ def _conditional_observe(**observe_kwargs: Any) -> Callable:
             return observe(**observe_kwargs)(func)
         return func
     return decorator
+
 
 T = TypeVar('T', bound=BaseModel)
 
