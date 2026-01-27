@@ -34,9 +34,10 @@ dependencies = [
 ]
 
 [project.scripts]
-jedireporter = "jedireporter.cli:main"
-jedireporter-workflow = "jedireporter.workflow:main"
+jedireporter = "jedireporter.workflow:main"
 jedireporter-impex = "jedireporter.impex:main"
+jedireporter-transcript-eval = "jedireporter.eval.transcript_fix.run_transcript_eval:main"
+jedireporter-article-compare = "jedireporter.eval.article_pairwise_comp.run_article_pairwise_comp:main"
 
 [project.optional-dependencies]
 dev = [

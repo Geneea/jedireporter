@@ -1,5 +1,6 @@
 import argparse
 from concurrent.futures import ThreadPoolExecutor
+from importlib.metadata import version
 from importlib.resources import read_text
 
 from dotenv import load_dotenv
@@ -97,9 +98,16 @@ class InterviewProcessor:
 
 
 def main():
+    _version = version("jedireporter")
     argparser = argparse.ArgumentParser(
+        prog='jedireporter',
         description='Process transcript JSON through the workflow. Accepts a single transcript or batch of transcripts'
                     ' but always in JSON-per-line format.'
+    )
+    argparser.add_argument(
+        '--version',
+        action='version',
+        version=f'%(prog)s {_version}',
     )
     addInOutArgGroups(argparser, in_title='Path to the transcript', out_title='Output article file')
     argparser.add_argument(
