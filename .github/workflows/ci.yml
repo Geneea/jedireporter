@@ -43,6 +43,10 @@ jobs:
     # Skip PR runs for internal branches (push event already triggers CI)
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
 
+    outputs:
+      is_semantic_tag: ${{ steps.get_package_version.outputs.is_semantic_tag }}
+      tag: ${{ steps.get_package_version.outputs.tag }}
+      version: ${{ steps.get_package_version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
 
@@ -60,16 +64,46 @@ jobs:
         run: |
           python -m build
 
+      - name: Get package version
+        id: get_package_version
+        run: |
+          pip install -e . > /dev/null
+          VERSION=$(python3 -c 'import importlib.metadata; print(importlib.metadata.version("jedireporter"))')
+          TAG="${GITHUB_REF##*/}"
+          IS_SEMANTIC_TAG=$(echo "$TAG" | grep -q '^v\?[0-9]\+\.[0-9]\+\.[0-9]\+$' && echo true || echo false)
+          echo "Version = '$VERSION', Tag = '$TAG', is semantic tag = '$IS_SEMANTIC_TAG'"
+          echo "is_semantic_tag=$IS_SEMANTIC_TAG" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
         with:
-          name: jedireporter-wheel
-          path: dist/*.whl
+          # jedireporter-0.1.0-py3-none-any.whl
+          name: jedireporter-${{ steps.get_package_version.outputs.version }}-py3-none-any.whl
+          path: dist/jedireporter-${{ steps.get_package_version.outputs.version }}-py3-none-any.whl
+          if-no-files-found: error
+          compression-level: 0  # wheels are ZIP archives
           retention-days: 1
 
-      - name: Upload sdist artifact
-        uses: actions/upload-artifact@v4
+  deploy_to_pypi:
+    name: Deploy to pypi.org
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    if: |
+      startsWith(github.ref, 'refs/tags/') &&
+      needs.build.outputs.is_semantic_tag == 'true' &&
+      needs.build.outputs.tag == format('v{0}', needs.build.outputs.version)
+    steps:
+      - name: Download wheel package
+        uses: actions/download-artifact@v4
         with:
-          name: jedireporter-sdist
-          path: dist/*.tar.gz
-          retention-days: 1
+          name: jedireporter-${{ needs.build.outputs.version }}-py3-none-any.whl
+          path: dist/
+
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}

@@ -7,7 +7,7 @@ name = "jedireporter"
 version = "0.1.0"
 description = "JEDI - Journalistic Excellence through Domain-specific Intelligence"
 readme = "README.md"
-license = {text = "Apache-2.0"}
+license = "Apache-2.0"
 requires-python = ">=3.12"
 authors = [
     { name = "Geneea Analytics s.r.o", email = "support@geneea.com" }
@@ -38,6 +38,9 @@ jedireporter = "jedireporter.workflow:main"
 jedireporter-impex = "jedireporter.impex:main"
 jedireporter-transcript-eval = "jedireporter.eval.transcript_fix.run_transcript_eval:main"
 jedireporter-article-compare = "jedireporter.eval.article_pairwise_comp.run_article_pairwise_comp:main"
+
+[project.urls]
+Repository = "https://github.com/Geneea/jedireporter"
 
 [project.optional-dependencies]
 dev = [
