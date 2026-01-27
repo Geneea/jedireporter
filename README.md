@@ -49,6 +49,17 @@ export AWS_DEFAULT_REGION=<aws-region>
 export AWS_BEDROCK_ROLE=<bedrock-role-arn>
 ```
 
+### Langfuse Observability (Optional)
+
+To enable [Langfuse](https://langfuse.com/) tracing for LLM calls, set both environment variables:
+
+```bash
+export LANGFUSE_PUBLIC_KEY=<your-public-key>
+export LANGFUSE_SECRET_KEY=<your-secret-key>
+```
+
+When not configured, the pipeline runs without tracing and no warnings are shown.
+
 ## Transcript Processing Workflow
 
 The main `jedireporter` command processes transcripts through a three-stage pipeline:

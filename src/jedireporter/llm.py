@@ -2,9 +2,9 @@ import os
 
 from abc import ABC, abstractmethod
 from enum import Enum
-from functools import cached_property
+from functools import cached_property, wraps
 from importlib.resources import open_text
-from typing import Any, ClassVar, Dict, Type, TypeVar
+from typing import Any, Callable, ClassVar, Dict, Type, TypeVar
 
 import boto3
 import httpx
@@ -12,9 +12,7 @@ import instructor
 import yaml
 
 from botocore.config import Config as BedrockConfig
-from langfuse import get_client, Langfuse, observe
-from langfuse.api import UnauthorizedError
-from langfuse.openai import OpenAI as LangfuseOpenAI
+from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageParam
 from pydantic import BaseModel, model_validator
 
@@ -23,6 +21,21 @@ from jedireporter.utils import dict_utils as dictutil
 from jedireporter.utils import logging as logutil
 
 LOG = logutil.getLogger(__package__, __file__)
+
+
+def langfuse_configured() -> bool:
+    """Check if Langfuse credentials are configured."""
+    return bool(os.getenv('LANGFUSE_PUBLIC_KEY') and os.getenv('LANGFUSE_SECRET_KEY'))
+
+
+def _conditional_observe(**observe_kwargs: Any) -> Callable:
+    """Decorator that applies langfuse.observe only when Langfuse is configured."""
+    def decorator(func: Callable) -> Callable:
+        if langfuse_configured():
+            from langfuse import observe
+            return observe(**observe_kwargs)(func)
+        return func
+    return decorator
 
 T = TypeVar('T', bound=BaseModel)
 
@@ -164,7 +177,7 @@ class LLMProfileLoader:
 
 class InstructorLLM(ABC):
     _client: instructor.Instructor
-    _langfuse_client: Langfuse
+    _langfuse_client: Any  # Langfuse client or None
     _profile: LLMProfile
     _max_retries: int
 
@@ -181,18 +194,22 @@ class InstructorLLM(ABC):
         self._profile = profile
         self._max_retries = max_retries
         self._client = self._build_client()
-        self._langfuse_client: Langfuse | None = get_client()
-        try:
-            self._langfuse_client.auth_check()
-        except httpx.ConnectTimeout as exc:
-            base_url = os.environ.get('LANGFUSE_BASE_URL')
-            LOG.warning(f'Failed to connect to {base_url} Langfuse instance, with following exception: {str(exc)}. '
-                        f'Logging to Langfuse is disabled.')
-            self._langfuse_client = None
-        except UnauthorizedError as exc:
-            LOG.warning(f'Provided credentials for Langfuse access are invalid, check the env vars, with following '
-                        f'exception: {str(exc)}. Logging to Langfuse is disabled.')
-            self._langfuse_client = None
+        self._langfuse_client = None
+        if langfuse_configured():
+            from langfuse import get_client
+            from langfuse.api import UnauthorizedError
+            self._langfuse_client = get_client()
+            try:
+                self._langfuse_client.auth_check()
+            except httpx.ConnectTimeout as exc:
+                base_url = os.environ.get('LANGFUSE_BASE_URL')
+                LOG.warning(f'Failed to connect to {base_url} Langfuse instance, with following exception: {str(exc)}. '
+                            f'Logging to Langfuse is disabled.')
+                self._langfuse_client = None
+            except UnauthorizedError as exc:
+                LOG.warning(f'Provided credentials for Langfuse access are invalid, check the env vars, with following '
+                            f'exception: {str(exc)}. Logging to Langfuse is disabled.')
+                self._langfuse_client = None
 
     @classmethod
     def from_profile(cls, profile: LLMProfile, *, max_retries: int = 3) -> 'InstructorLLM':
@@ -275,7 +292,11 @@ class InstructorLLM(ABC):
 class OpenAIInstructorLLM(InstructorLLM, provider=LLMProvider.OPENAI):
 
     def _build_client(self) -> instructor.Instructor:
-        client = LangfuseOpenAI(api_key=self._profile.api_key)
+        if langfuse_configured():
+            from langfuse.openai import OpenAI as LangfuseOpenAI
+            client = LangfuseOpenAI(api_key=self._profile.api_key)
+        else:
+            client = OpenAI(api_key=self._profile.api_key)
         return instructor.from_openai(client, mode=instructor.Mode.RESPONSES_TOOLS_WITH_INBUILT_TOOLS)
 
     def get_completion(
@@ -336,7 +357,7 @@ class BedrockInstructorLLM(InstructorLLM, provider=LLMProvider.BEDROCK):
         )
         return instructor.from_bedrock(bedrock_client)
 
-    @observe(as_type='generation', name='bedrock-instructor')
+    @_conditional_observe(as_type='generation', name='bedrock-instructor')
     def get_completion(
             self,
             user_prompt: str,
@@ -407,7 +428,7 @@ class MistralInstructorLLM(InstructorLLM, provider=LLMProvider.MISTRAL):
         )
         return client
 
-    @observe(as_type='generation', name='mistral-instructor')
+    @_conditional_observe(as_type='generation', name='mistral-instructor')
     def get_completion(
             self,
             user_prompt: str,

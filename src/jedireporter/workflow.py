@@ -4,7 +4,7 @@ from importlib.metadata import version
 from importlib.resources import read_text
 
 from dotenv import load_dotenv
-from langfuse.langchain import CallbackHandler
+from langchain_core.callbacks import BaseCallbackHandler
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from pydantic import BaseModel
@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from jedireporter.article import Article
 from jedireporter.create_article import CreateArticleNodes, CreateArticleState
 from jedireporter.fix_transcript import FixedState, FixTranscriptNodes
-from jedireporter.llm import InstructorLLM, LLMProfileLoader
+from jedireporter.llm import InstructorLLM, langfuse_configured, LLMProfileLoader
 from jedireporter.post_process_article import PostProcessArticleNodes, PostProcessArticleState
 from jedireporter.transcript import Transcript
 from jedireporter.utils import logging as logutil
@@ -20,6 +20,14 @@ from jedireporter.utils import parallel
 from jedireporter.utils.cli_utils import addInOutArgGroups, argOpenIn, argOpenOut
 
 LOG = logutil.getLogger(__package__, __file__)
+
+
+def _get_langfuse_callbacks() -> list[BaseCallbackHandler]:
+    """Return Langfuse callback handler if configured, otherwise empty list."""
+    if langfuse_configured():
+        from langfuse.langchain import CallbackHandler
+        return [CallbackHandler()]
+    return []
 
 
 class State(BaseModel):
@@ -53,9 +61,9 @@ class InterviewProcessor:
         if self._fix_transcript_subgraph is None:
             raise ValueError('Fixed transcript subgraph must be built before running it.')
         LOG.info(f'[{state.source.id}] Fixing transcript ...')
-        handler = CallbackHandler()
+        callbacks = _get_langfuse_callbacks()
         response = self._fix_transcript_subgraph.invoke(FixedState(source=state.source),
-                                                        config={'callbacks': [handler]})
+                                                        config={'callbacks': callbacks})
         return {'fixed': response['fixed']}
 
     def run_create_article_subgraph(self, state: State) -> dict[str, Article]:
@@ -65,9 +73,9 @@ class InterviewProcessor:
         if state.fixed is None:
             raise ValueError('Fixed transcript not available before create_article step')
         # Invoke the subgraph with its own pydantic state and map the result back
-        handler = CallbackHandler()
+        callbacks = _get_langfuse_callbacks()
         response = self._create_article_subgraph.invoke(CreateArticleState(fixed=state.fixed),
-                                                        config={'callbacks': [handler]})
+                                                        config={'callbacks': callbacks})
         return {'article': response['article']}
 
     def modify_style(self, state: State) -> dict[str, Article]:
@@ -77,9 +85,9 @@ class InterviewProcessor:
         if state.article is None:
             raise ValueError('Article not available before post_process_article step')
         # Invoke the subgraph with its own pydantic state and map the result back
-        handler = CallbackHandler()
+        callbacks = _get_langfuse_callbacks()
         response = self._post_process_article_subgraph.invoke(
-            PostProcessArticleState(article=state.article, transcript=state.fixed), config={'callbacks': [handler]})
+            PostProcessArticleState(article=state.article, transcript=state.fixed), config={'callbacks': callbacks})
         return {'styled': response['enriched_article']}
 
     def create_workflow(self) -> CompiledStateGraph:
@@ -140,8 +148,8 @@ def main():
 
     def _invoke(state: State) -> dict[str, Transcript | Article] | None:
         try:
-            handler = CallbackHandler()
-            return chain.invoke(state, config={'callbacks': [handler]})
+            callbacks = _get_langfuse_callbacks()
+            return chain.invoke(state, config={'callbacks': callbacks})
         except Exception:
             LOG.exception(f'Failed to process transcript {state.source.id}')
             return None
