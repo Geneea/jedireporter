@@ -98,26 +98,48 @@ class TestLLMProfileLoader:
             temperature=0.0
         )
 
-    def test_missing_credentials(self) -> None:
-        with pytest.raises(ValueError):
+    def test_missing_config_raises_on_creation(self) -> None:
+        """Missing env var names should raise during profile creation."""
+        with pytest.raises(ValueError, match='api_key_env'):
             LLMProfile(
                 name='test-openai',
                 model_version='gpt-test',
                 provider=LLMProvider.OPENAI,
-                api_key_env='UNSET_KEY',
+                # api_key_env is missing
             )
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match='aws_credentials_env'):
             LLMProfile(
                 name='test-bedrock',
                 model_version='claude-test',
                 provider=LLMProvider.BEDROCK,
-                aws_credentials_env=AwsCredentialEnvConfig(
-                    access_key_id_env='UNSET',
-                    secret_access_key_env='UNSET',
-                    region_env='UNSET',
-                    role_env='UNSET_ROLE',
-                ),
+                # aws_credentials_env is missing
             )
+
+    def test_missing_credentials_raises_on_access(self) -> None:
+        """Missing env var values should raise when credentials are accessed, not during creation."""
+        # Profile creation should succeed even with unset env vars
+        openai_profile = LLMProfile(
+            name='test-openai',
+            model_version='gpt-test',
+            provider=LLMProvider.OPENAI,
+            api_key_env='UNSET_KEY',
+        )
+        bedrock_profile = LLMProfile(
+            name='test-bedrock',
+            model_version='claude-test',
+            provider=LLMProvider.BEDROCK,
+            aws_credentials_env=AwsCredentialEnvConfig(
+                access_key_id_env='UNSET',
+                secret_access_key_env='UNSET',
+                region_env='UNSET',
+                role_env='UNSET_ROLE',
+            ),
+        )
+        # But accessing credentials should fail
+        with pytest.raises(ValueError, match='UNSET_KEY'):
+            _ = openai_profile.api_key
+        with pytest.raises(ValueError, match='UNSET'):
+            _ = bedrock_profile.aws_credentials
 
     def test_default_profile(self, default_profile: LLMProfile) -> None:
         actual = LLMProfileLoader.get('default')

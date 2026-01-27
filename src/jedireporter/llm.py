@@ -108,9 +108,19 @@ class LLMProfile(CamelModel):
         raise ValueError(f'Environment variable "{self.aws_credentials_env.role_env}" is not set')
 
     @model_validator(mode='after')
-    def check_provider_access(self):
-        if self.api_key is None and self.aws_credentials is None:
-            raise ValueError('OpenAI API key or AWS credentials must be configured via environment variables.')
+    def check_provider_config(self):
+        """Validate that env var names are configured for the provider, without checking their values."""
+        if self.provider is LLMProvider.BEDROCK:
+            if self.aws_credentials_env is None:
+                raise ValueError(
+                    f'AWS credential environment variable names must be configured in "aws_credentials_env" '
+                    f'for {self.provider} provider.'
+                )
+        else:
+            if self.api_key_env is None:
+                raise ValueError(
+                    f'Environment variable name must be defined in "api_key_env" for {self.provider} provider.'
+                )
         return self
 
 
