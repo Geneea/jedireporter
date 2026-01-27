@@ -25,6 +25,17 @@ jedireporter-impex export --format markdown -i article.jsonl -o output.md
 
 ## Configuration
 
+### Environment Variables
+
+Copy the template file and fill in your credentials:
+
+```bash
+cp .env_template .env
+# Edit .env with your API keys and credentials
+```
+
+The `jedireporter` command automatically loads `.env` from the current directory. Alternatively, set the environment variables directly in your shell.
+
 ### LLM Profiles
 
 Select an LLM profile using `--llm-profile <name>`. Available profiles:
