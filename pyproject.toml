@@ -39,6 +39,9 @@ jedireporter-impex = "jedireporter.impex:main"
 jedireporter-transcript-eval = "jedireporter.eval.transcript_fix.run_transcript_eval:main"
 jedireporter-article-compare = "jedireporter.eval.article_pairwise_comp.run_article_pairwise_comp:main"
 
+[project.urls]
+Repository = "https://github.com/Geneea/jedireporter"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0",
