@@ -37,6 +37,15 @@ jobs:
         run: |
           tox
 
+      - name: Publish test results
+        uses: dorny/test-reporter@v1
+        # run this step even if a previous step failed, but not for fork PRs (no write permissions)
+        if: (success() || failure()) && github.event_name == 'push'
+        with:
+          name: Test results
+          path: ./test-results.xml
+          reporter: 'java-junit'
+
   build:
     runs-on: ubuntu-latest
     needs: test

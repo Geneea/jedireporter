@@ -100,14 +100,14 @@ class TestLLMProfileLoader:
 
     def test_missing_config_raises_on_creation(self) -> None:
         """Missing env var names should raise during profile creation."""
-        with pytest.raises(ValueError, match='api_key_env'):
+        with pytest.raises(RuntimeError, match='api_key_env'):
             LLMProfile(
                 name='test-openai',
                 model_version='gpt-test',
                 provider=LLMProvider.OPENAI,
                 # api_key_env is missing
             )
-        with pytest.raises(ValueError, match='aws_credentials_env'):
+        with pytest.raises(RuntimeError, match='aws_credentials_env'):
             LLMProfile(
                 name='test-bedrock',
                 model_version='claude-test',
@@ -136,9 +136,9 @@ class TestLLMProfileLoader:
             ),
         )
         # But accessing credentials should fail
-        with pytest.raises(ValueError, match='UNSET_KEY'):
+        with pytest.raises(RuntimeError, match='UNSET_KEY'):
             _ = openai_profile.api_key
-        with pytest.raises(ValueError, match='UNSET'):
+        with pytest.raises(RuntimeError, match='UNSET'):
             _ = bedrock_profile.aws_credentials
 
     def test_default_profile(self, default_profile: LLMProfile) -> None:

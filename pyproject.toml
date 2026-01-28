@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "jedireporter"
-version = "0.1.0"
+version = "0.2.0"
 description = "JEDI - Journalistic Excellence through Domain-specific Intelligence"
 readme = "README.md"
 license = "Apache-2.0"
@@ -22,15 +22,17 @@ classifiers = [
 dependencies = [
     "boto3",
     "botocore",
+    "fastapi~=0.124",
     "httpx~=0.28",
     "instructor[bedrock,mistral]~=1.11",
     "langchain[openai]~=0.3",
-    "langfuse~=3.10",
+    "langfuse~=3.10,<3.12",  # 3.12 version does not work with older Langfuse servers (e.g. v3.124.1)
     "langgraph~=0.6",
     "langsmith~=0.4",
     "pydantic~=2.12",
     "python-dotenv~=1.1",
     "PyYAML",
+    "uvicorn~=0.38",
 ]
 
 [project.scripts]
@@ -38,6 +40,7 @@ jedireporter = "jedireporter.workflow:main"
 jedireporter-impex = "jedireporter.impex:main"
 jedireporter-transcript-eval = "jedireporter.eval.transcript_fix.run_transcript_eval:main"
 jedireporter-article-compare = "jedireporter.eval.article_pairwise_comp.run_article_pairwise_comp:main"
+jedireporter-server = "jedireporter.restapi.server:main"
 
 [project.urls]
 Repository = "https://github.com/Geneea/jedireporter"
@@ -83,7 +86,7 @@ isolated_build = true
 
 [tool.tox.env_run_base]
 extras = ["dev", "eval", "google"]
-commands = [["pytest", "{posargs}"]]
+commands = [["pytest", "--junitxml=test-results.xml", "{posargs}"]]
 
 [tool.tox.env.lint]
 deps = ["flake8>=6.0", "flake8-pyproject>=1.2"]

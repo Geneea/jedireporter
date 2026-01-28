@@ -80,12 +80,12 @@ class LLMProfile(CamelModel):
         if self.provider is LLMProvider.BEDROCK:
             return None     # Bedrock relies on AWS credentials mentioned in `.env_template`
         if self.api_key_env is None:
-            raise ValueError(
+            raise RuntimeError(
                 f'Environment variable name must be defined in "api_key_env" for {self.provider} provider.'
             )
         if value := os.getenv(self.api_key_env):
             return value
-        raise ValueError(f'Environment variable "{self.api_key_env}" is not set')
+        raise RuntimeError(f'Environment variable "{self.api_key_env}" is not set')
 
     @cached_property
     def aws_credentials(self) -> AwsCredentials | None:
@@ -93,14 +93,14 @@ class LLMProfile(CamelModel):
             return None     # OpenAI and Mistral rely on API key mentioned in `.env_template`
         env_config = self.aws_credentials_env
         if env_config is None:
-            raise ValueError(
+            raise RuntimeError(
                 f'AWS credential environment variables must be configured for {self.provider} provider.'
             )
 
         def read_env(env_name: str) -> str:
             if value := os.getenv(env_name):
                 return value
-            raise ValueError(f'Environment variable "{env_name}" is not set')
+            raise RuntimeError(f'Environment variable "{env_name}" is not set')
 
         return AwsCredentials(
             access_key_id=read_env(env_config.access_key_id_env),
@@ -113,7 +113,7 @@ class LLMProfile(CamelModel):
         if self.provider in (LLMProvider.OPENAI, LLMProvider.MISTRAL):
             return None
         if self.aws_credentials_env is None or self.aws_credentials_env.role_env is None:
-            raise ValueError(
+            raise RuntimeError(
                 f'Environment variable name must be defined in "aws_credentials_env.role_env" '
                 f'for {self.provider} provider.'
             )
@@ -126,13 +126,13 @@ class LLMProfile(CamelModel):
         """Validate that env var names are configured for the provider, without checking their values."""
         if self.provider is LLMProvider.BEDROCK:
             if self.aws_credentials_env is None:
-                raise ValueError(
+                raise RuntimeError(
                     f'AWS credential environment variable names must be configured in "aws_credentials_env" '
                     f'for {self.provider} provider.'
                 )
         else:
             if self.api_key_env is None:
-                raise ValueError(
+                raise RuntimeError(
                     f'Environment variable name must be defined in "api_key_env" for {self.provider} provider.'
                 )
         return self

@@ -4,6 +4,16 @@
 
 AI-powered transcript processing that cleans up interview transcripts and converts them into polished article format.
 
+The JEDI Project is a collaboration between [Atex](https://www.atex.com/) and [Geneea](https://geneea.com).
+
+---
+
+[![PyPI version](https://img.shields.io/pypi/v/jedireporter)](https://pypi.org/project/jedireporter/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/jedireporter)](https://pypi.org/project/jedireporter/)
+[![License](https://img.shields.io/pypi/l/jedireporter)](https://github.com/Geneea/jedireporter/blob/main/LICENSE)
+[![Downloads](https://img.shields.io/pypi/dm/jedireporter)](https://pypi.org/project/jedireporter/)
+[![Build Status](https://github.com/Geneea/jedireporter/workflows/CI/badge.svg)](https://github.com/Geneea/jedireporter/actions)
+
 ## Installation
 
 ```bash
@@ -227,11 +237,62 @@ jedireporter-impex export --format google-doc -i article.jsonl --credentials ser
 | `-i`, `--input-file` | Input article JSON file |
 | `-o`, `--output-file` | Output file path (markdown only) |
 
+## REST API Service
+
+Run the transcript processing pipeline as a web service.
+
+### Starting the Server
+
+```bash
+jedireporter-server --bind localhost --port 5000
+```
+
+| Option | Description |
+|--------|-------------|
+| `--bind` | Network interface to listen on (default: `localhost`) |
+| `--port` | Port number (default: `5000`) |
+
+### Configuration
+
+The server uses the same environment variables as the CLI:
+
+- `JEDI_LLM_PROFILE` - LLM profile name (default: `default`)
+- `JEDI_SERVER_PATH` - URL path prefix for reverse proxy setups
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/status` | GET | Health check |
+| `/v1/generate-article` | POST | Generate article from transcript |
+
+### Example: Generate Article
+
+```bash
+curl -X POST http://localhost:5000/v1/generate-article \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "interview-001",
+    "language": "en",
+    "segments": [
+      {"id": "0", "speakerId": "host", "text": "Welcome to the show."},
+      {"id": "1", "speakerId": "guest", "text": "Thank you for having me."}
+    ],
+    "speakers": [
+      {"speakerId": "host", "role": "host", "name": "John Smith"},
+      {"speakerId": "guest", "role": "guest", "name": "Jane Doe"}
+    ]
+  }'
+```
+
+The API uses camelCase for JSON field names. See `/docs` for interactive API documentation (Swagger UI).
+
 ## Command Reference
 
 | Command | Description |
 |---------|-------------|
 | `jedireporter` | Main processing workflow (transcript to article) |
+| `jedireporter-server` | Start the REST API service |
 | `jedireporter-impex import` | Convert plain text or AWS Transcribe output to transcript JSON |
 | `jedireporter-impex export` | Convert article JSON to markdown/Google Docs |
 
