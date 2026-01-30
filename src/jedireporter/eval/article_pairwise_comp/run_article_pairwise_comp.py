@@ -87,7 +87,7 @@ class ArticlePairwiseComparison:
         for model in ['default', 'gpt-5-mini', 'gpt-5', 'mistral', 'gpt-4.1', 'claude']:
             if stem.find(model) != -1:
                 if model == 'default':
-                    return f'{model} (gpt-4.1)'
+                    return f'{model} (gpt-5.1)'
                 return model
         return stem
 
