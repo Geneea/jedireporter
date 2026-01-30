@@ -33,8 +33,7 @@ class TranscriptFixEvaluation:
         self.per_sample_records: list[dict[str, float]] = []
 
     def prepare_transcript_pairs(self) -> Iterable[tuple[Transcript, Transcript, Transcript | None]]:
-        gold_context = open(self.config.gold_path) if (
-                    self.config.gold_path and self.config.gold_path.exists()) else nullcontext(list())
+        gold_context = open(self.config.gold_path) if self.config.gold_path else nullcontext(list())
         with gold_context as gold_file, open(self.config.source) as source_file, open(
                 self.config.generated) as generated_file:
             # Pair lines from gold, source and generated using zip_longest:
