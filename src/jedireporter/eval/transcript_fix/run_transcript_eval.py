@@ -1,4 +1,5 @@
 import argparse
+from contextlib import nullcontext
 from dataclasses import dataclass
 from itertools import zip_longest
 from pathlib import Path
@@ -32,7 +33,9 @@ class TranscriptFixEvaluation:
         self.per_sample_records: list[dict[str, float]] = []
 
     def prepare_transcript_pairs(self) -> Iterable[tuple[Transcript, Transcript, Transcript | None]]:
-        with open(self.config.gold_path) as gold_file, open(self.config.source) as source_file, open(
+        gold_context = open(self.config.gold_path) if (
+                    self.config.gold_path and self.config.gold_path.exists()) else nullcontext(list())
+        with gold_context as gold_file, open(self.config.source) as source_file, open(
                 self.config.generated) as generated_file:
             # Pair lines from gold, source and generated using zip_longest:
             # - Stop when generated is exhausted (no more evaluation input)
@@ -63,6 +66,8 @@ class TranscriptFixEvaluation:
                         LOG.info(
                             f'Source transcript id {source_transcript.id} does not have golden reference, '
                             f'evaluating without gold sample.')
+                    elif not self.config.gold_path:
+                        gold_transcript = None
                     else:
                         raise exc
 
@@ -120,9 +125,8 @@ def parse_args() -> EvaluationConfig:
                         required=True,
                         type=Path)
     parser.add_argument('--gold',
-                        default='gold_transcripts',
+                        default=None,
                         help='Path to JSONL with gold transcripts',
-                        required=True,
                         type=Path)
     parser.add_argument('--source',
                         help='JSONL with original ASR transcripts used both as workflow input and baseline',
