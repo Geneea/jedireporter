@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "jedireporter"
-version = "0.2.0"
+version = "0.2.1"
 description = "JEDI - Journalistic Excellence through Domain-specific Intelligence"
 readme = "README.md"
 license = "Apache-2.0"
@@ -33,6 +33,9 @@ dependencies = [
     "python-dotenv~=1.1",
     "PyYAML",
     "uvicorn~=0.38",
+    "google-api-python-client~=2.186",
+    "google-auth-httplib2~=0.2",
+    "google-auth-oauthlib~=1.2",
 ]
 
 [project.scripts]
@@ -56,11 +59,6 @@ eval = [
     "jiwer~=4.0",
     "numpy~=2.4",
     "scipy~=1.15",
-]
-google = [
-    "google-api-python-client~=2.186",
-    "google-auth-httplib2~=0.2",
-    "google-auth-oauthlib~=1.2",
 ]
 
 [tool.setuptools.packages.find]
